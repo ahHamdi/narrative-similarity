@@ -1,10 +1,6 @@
 # Narrative Similarity
 
----
-
-## Requirements
-
-- Python **3.9+** (tested with 3.12)
+![Python](https://img.shields.io/badge/Python-3.9%2B%20(tested%203.12)-blue)
 
 
 ## Track A – Embedding-Based Similarity Baseline
