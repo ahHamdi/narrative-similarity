@@ -53,12 +53,6 @@ if __name__ == "__main__":
     )
 
     p.add_argument(
-        "--output-name",
-        default="track_a_predictions.jsonl",
-        help="Output filename (saved under data/output/)",
-    )
-
-    p.add_argument(
         "--model",
         choices=MODEL_CHOICES.keys(),
         default="ahmed_autotrain_masked",
@@ -84,28 +78,22 @@ if __name__ == "__main__":
     random.seed(args.seed)
     np.random.seed(args.seed)
 
-    model_name = MODEL_CHOICES[args.model]
+    model_key = args.model
+    model_name = MODEL_CHOICES[model_key]
+
     print(f"Using model: {model_name}")
     print(f"Baseline: {args.baseline}")
 
+    # Output directory
     output_dir = "data/output"
     os.makedirs(output_dir, exist_ok=True)
 
-    output_path = os.path.join(output_dir, args.output_name)
-
-    # -----------------------------
-    # Load model ONCE
-    # -----------------------------
     model = SentenceTransformer(model_name)
 
-    # -----------------------------
     # Load data
-    # -----------------------------
     df = pd.read_json(args.input, lines=True)
 
-    # -----------------------------
     # Predict
-    # -----------------------------
     if args.baseline == "embeddings":
         df["predicted_text_a_is_closer"] = df.apply(
             lambda r: embeddings_predict(r, model),
@@ -116,16 +104,25 @@ if __name__ == "__main__":
             random.choice([True, False]) for _ in range(len(df))
         ]
 
-    # -----------------------------
     # Evaluate (if gold present)
-    # -----------------------------
+    accuracy = None
     if "text_a_is_closer" in df.columns:
         accuracy = (df["predicted_text_a_is_closer"] == df["text_a_is_closer"]).mean()
-        print(f"Accuracy {model_name}: {accuracy:.3f}")
+        print(f"Accuracy {model_key}: {accuracy:.3f}")
 
-    # -----------------------------
+    # Build output filename
+    input_base = os.path.splitext(os.path.basename(args.input))[0]
+
+    if accuracy is not None:
+        acc_str = f"{accuracy:.3f}"
+    else:
+        acc_str = "na"
+
+    output_filename = f"{input_base}__{model_key}__acc-{acc_str}.jsonl"
+
+    output_path = os.path.join(output_dir, output_filename)
+
     # Write output
-    # -----------------------------
     df["text_a_is_closer"] = df["predicted_text_a_is_closer"]
     df.drop(columns=["predicted_text_a_is_closer"], inplace=True)
 
