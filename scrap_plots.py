@@ -4,17 +4,16 @@ import time
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 
-HEADERS = {
-    "User-Agent": "WikiFilmDataset/1.2 (research; contact=example@email.com)"
-}
+HEADERS = {"User-Agent": "WikiFilmDataset/1.2 (research; contact=example@email.com)"}
 
 LANGS = {
     "fr": ["Synopsis"],
     "es": ["Sinopsis"],
     "pt": ["Sinopse"],
     "de": ["Handlung"],
-    "it": ["Trama"]
+    "it": ["Trama"],
 }
+
 
 def safe_get_json(url, params):
     try:
@@ -24,6 +23,7 @@ def safe_get_json(url, params):
         return resp.json()
     except (requests.exceptions.RequestException, ValueError):
         return None
+
 
 def get_movies_by_year(start=1990, end=2020, limit=10000):
     api = "https://en.wikipedia.org/w/api.php"
@@ -40,7 +40,7 @@ def get_movies_by_year(start=1990, end=2020, limit=10000):
                 "list": "categorymembers",
                 "cmtitle": f"Category:{category}",
                 "cmnamespace": 0,
-                "cmlimit": 500
+                "cmlimit": 500,
             }
             if cont:
                 params["cmcontinue"] = cont
@@ -62,6 +62,7 @@ def get_movies_by_year(start=1990, end=2020, limit=10000):
 
     return films[:limit]
 
+
 def get_section_index(title, lang, section_names):
     api = f"https://{lang}.wikipedia.org/w/api.php"
 
@@ -70,7 +71,7 @@ def get_section_index(title, lang, section_names):
         "format": "json",
         "page": title,
         "prop": "sections",
-        "redirects": True
+        "redirects": True,
     }
 
     r = safe_get_json(api, params)
@@ -83,6 +84,7 @@ def get_section_index(title, lang, section_names):
 
     return None
 
+
 def get_section_text(title, lang, section_index):
     api = f"https://{lang}.wikipedia.org/w/api.php"
 
@@ -92,7 +94,7 @@ def get_section_text(title, lang, section_index):
         "page": title,
         "section": section_index,
         "prop": "text",
-        "redirects": True
+        "redirects": True,
     }
 
     r = safe_get_json(api, params)
@@ -108,6 +110,7 @@ def get_section_text(title, lang, section_index):
 
     return text.strip()
 
+
 def get_langlinks(title):
     api = "https://en.wikipedia.org/w/api.php"
 
@@ -116,7 +119,7 @@ def get_langlinks(title):
         "format": "json",
         "prop": "langlinks",
         "titles": title,
-        "lllimit": 500
+        "lllimit": 500,
     }
 
     r = safe_get_json(api, params)
@@ -125,6 +128,7 @@ def get_langlinks(title):
 
     page = next(iter(r.get("query", {}).get("pages", {}).values()), {})
     return {l["lang"]: l["*"] for l in page.get("langlinks", [])}
+
 
 def build_dataset(max_films=10000):
     rows = []
@@ -153,15 +157,12 @@ def build_dataset(max_films=10000):
             if not plot_other or len(plot_other) < 300:
                 continue
 
-            rows.append({
-                "film": film,
-                "plot_en": plot_en,
-                "plot_other": plot_other
-            })
+            rows.append({"film": film, "plot_en": plot_en, "plot_other": plot_other})
 
         time.sleep(0.25)
 
     return pd.DataFrame(rows)
+
 
 if __name__ == "__main__":
     df = build_dataset(10000)

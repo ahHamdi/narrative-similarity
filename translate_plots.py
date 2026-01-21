@@ -32,19 +32,11 @@ def load_csv_safe(path):
         return pd.read_csv(path)
     except Exception:
         print("CSV cassé — tentative de réparation...")
-        return pd.read_csv(
-            path,
-            engine="python",
-            on_bad_lines="skip"
-        )
+        return pd.read_csv(path, engine="python", on_bad_lines="skip")
 
 
 def save_csv_safe(df, path):
-    df.to_csv(
-        path,
-        index=False,
-        quoting=csv.QUOTE_ALL
-    )
+    df.to_csv(path, index=False, quoting=csv.QUOTE_ALL)
 
 
 def load_existing_output():
@@ -56,11 +48,7 @@ def load_existing_output():
 
 def translate_batch(texts, tokenizer, model):
     inputs = tokenizer(
-        texts,
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-        max_length=MAX_LENGTH
+        texts, return_tensors="pt", padding=True, truncation=True, max_length=MAX_LENGTH
     ).to(DEVICE)
 
     with torch.no_grad():
@@ -81,10 +69,7 @@ def main():
     done_keys = set()
 
     if df_done is not None:
-        df_done["key"] = (
-            df_done["film"] + "||" +
-            df_done[LANG_COL]
-        )
+        df_done["key"] = df_done["film"] + "||" + df_done[LANG_COL]
         done_keys = set(df_done["key"])
 
     if "plot_translated" not in df.columns:
@@ -93,7 +78,7 @@ def main():
     for lang, model_name in MODEL_MAP.items():
         print(f"\nTraduction {lang} → EN")
 
-        mask = (df[LANG_COL] == lang)
+        mask = df[LANG_COL] == lang
         if not mask.any():
             continue
 
