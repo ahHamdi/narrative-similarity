@@ -27,17 +27,16 @@ def replace_ner(text: str) -> str:
     for ent in sorted(doc.ents, key=lambda e: e.start_char, reverse=True):
         if ent.label_ in TARGET_ENTS:
             new_text = (
-                new_text[:ent.start_char]
-                + ent.label_
-                + new_text[ent.end_char:]
+                new_text[: ent.start_char] + ent.label_ + new_text[ent.end_char :]
             )
 
     return new_text
 
 
 def process_jsonl(input_path: str, output_path: str):
-    with open(input_path, "r", encoding="utf-8") as fin, \
-         open(output_path, "w", encoding="utf-8") as fout:
+    with open(input_path, "r", encoding="utf-8") as fin, open(
+        output_path, "w", encoding="utf-8"
+    ) as fout:
 
         for line_id, line in enumerate(fin, 1):
             if not line.strip():

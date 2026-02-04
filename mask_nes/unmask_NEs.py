@@ -13,9 +13,9 @@ def restore_jsonl(masked_path, original_path, output_path):
     original_path = Path(original_path)
     output_path = Path(output_path)
 
-    with masked_path.open("r", encoding="utf-8") as f_masked, \
-         original_path.open("r", encoding="utf-8") as f_orig, \
-         output_path.open("w", encoding="utf-8") as fout:
+    with masked_path.open("r", encoding="utf-8") as f_masked, original_path.open(
+        "r", encoding="utf-8"
+    ) as f_orig, output_path.open("w", encoding="utf-8") as fout:
 
         for line_id, (line_masked, line_orig) in enumerate(
             zip(f_masked, f_orig), start=1

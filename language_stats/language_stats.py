@@ -8,7 +8,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 nltk.download("punkt")
-nltk.download('punkt_tab')
+nltk.download("punkt_tab")
 
 CSV_PATH = "plots_fr_en.autotrain_NE_masked.csv"
 ENTITY_LABELS = {"PERSON", "LOC", "GPE", "ORG"}
@@ -20,8 +20,10 @@ assert {"plots_en", "plots_fr_en"}.issubset(df.columns)
 def tokenize(text):
     return word_tokenize(str(text))
 
+
 def count_entities(tokens):
     return Counter(t for t in tokens if t in ENTITY_LABELS)
+
 
 def corpus_statistics(texts):
     n_plots = len(texts)
@@ -43,11 +45,13 @@ def corpus_statistics(texts):
         "avg_tokens_per_plot": np.mean(token_counts),
         "total_entities": sum(entity_counts),
         "avg_entities_per_plot": np.mean(entity_counts),
-        "entities_by_label": dict(entity_per_label)
+        "entities_by_label": dict(entity_per_label),
     }
+
 
 stats_en = corpus_statistics(df["plots_en"])
 stats_pt_en = corpus_statistics(df["plots_fr_en"])
+
 
 def print_stats(title, stats):
     print(f"\n {title}")
@@ -60,14 +64,15 @@ def print_stats(title, stats):
     for k, v in stats["entities_by_label"].items():
         print(f"  {k}: {v}")
 
+
 print_stats("English original plots", stats_en)
 print_stats("French-English translated plots", stats_pt_en)
+
 
 def clean_for_wordcloud(text):
     tokens = tokenize(text)
     tokens = [
-        t.lower() for t in tokens
-        if t.isalpha() and t.upper() not in ENTITY_LABELS
+        t.lower() for t in tokens if t.isalpha() and t.upper() not in ENTITY_LABELS
     ]
     return " ".join(tokens)
 
@@ -76,10 +81,7 @@ def generate_wordcloud(texts, title):
     full_text = " ".join(clean_for_wordcloud(t) for t in texts)
 
     wc = WordCloud(
-        width=1200,
-        height=600,
-        background_color="white",
-        max_words=200
+        width=1200, height=600, background_color="white", max_words=200
     ).generate(full_text)
 
     plt.figure(figsize=(12, 6))
@@ -87,6 +89,7 @@ def generate_wordcloud(texts, title):
     plt.axis("off")
     plt.title(title)
     plt.show()
+
 
 generate_wordcloud(df["plots_en"], "English Original Plots")
 generate_wordcloud(df["plots_fr_en"], "French-English Translated Plots")
